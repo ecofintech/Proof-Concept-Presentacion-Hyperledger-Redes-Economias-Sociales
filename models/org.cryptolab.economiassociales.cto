@@ -1,0 +1,385 @@
+
+
+/**
+
+ * Modelo de expedicion de certificados
+
+ */
+
+
+
+namespace org.cryptolab.economiassociales
+
+
+
+enum TipoCertificado {
+
+	o AsistenciaAsamblea
+
+	o Productor
+
+	o ReporteTransparencia
+
+}
+
+
+
+enum TipoProducto {
+
+	o Aceite
+
+	o Naranjas
+
+	o Higiene
+
+	o Arroz
+
+	o Pasta
+
+	o Artesanias
+
+}
+
+
+
+participant Productora identified by idProductora {
+
+		o String idProductora
+
+		o String nombre
+
+		o String localizacion
+
+		--> Nodo nodo
+
+}
+
+
+
+participant Comerciante identified by idComerciante {
+
+		o String idComerciante
+
+		o String nombre
+
+		o String localizacion
+
+		--> Nodo nodo
+
+}
+
+
+
+asset Producto identified by idProducto {
+
+    o String idProducto
+
+    o String nombre
+
+    o String Descripcion
+
+		o TipoProducto tipoproducto
+
+
+
+}
+
+
+
+asset Servicio identified by idServicio {
+
+    o String idServicio
+
+    o String nombre
+
+    o String Descripcion
+
+}
+
+
+
+participant Nodo identified by idNodo {
+
+    o String idNodo
+
+    o String nombre
+
+    o String localizacion
+
+    o String delegada
+
+    o Double numeroMiembrosParticipantes
+
+}
+
+
+
+participant Participante identified by idParticipante {
+
+    o String idParticipante
+
+    o String nombre
+
+    o String apellido
+
+    o String pais
+
+    o String email
+
+}
+
+
+
+asset Certificado identified by idCertificado {
+
+    o String idCertificado
+
+    o String nombre
+
+    o TipoCertificado tipo
+
+
+
+}
+
+
+
+asset CertificadoExpedido identified by idCE {
+
+    o String idCE
+
+    --> Participante participante
+
+    --> Nodo nodo
+
+    --> Certificado certificado
+
+
+
+}
+
+
+
+transaction Certificar {
+
+      o String idExpedicion
+
+    --> Participante participante
+
+    --> Nodo nodo
+
+    --> Certificado certificado
+
+
+
+}
+
+
+
+transaction AnadirNodo {
+
+    o String idNodo
+
+    o String nombre
+
+    o String localizacion
+
+    o String delegada
+
+    o Double numeroMiembrosParticipantes
+
+}
+
+
+
+participant PointOfExchange identified by pointofexchangeId {
+
+  o String pointofexchangeId
+
+  o String pointofexchangeName
+
+  o Currency workingCurrency default = 'FCASH'
+
+  o Long fundBalance default = 5000000
+
+	--> Nodo nodo
+
+}
+
+
+
+asset TransferRequest identified by requestId {
+
+  o String requestId
+
+  o Transfer details
+
+  o TransferRequestState fromPoeState default = 'PRE_PROCESS_COMPLETE'
+
+  o TransferRequestState toPoeState
+
+  o TransferRequestState state
+
+  --> PointOfExchange fromPoe
+
+  --> PointOfExchange toPoe
+
+}
+
+
+
+asset BatchTransferRequest identified by batchId {
+
+  o String batchId
+
+  o Settlement settlement
+
+  o BatchState state
+
+  --> PointOfExchange[] parties
+
+  --> TransferRequest[] transferRequests
+
+}
+
+
+
+transaction SubmitTransferRequest {
+
+ o String transferId
+
+ o String toPoe
+
+ o TransferRequestState state
+
+ o Transfer details
+
+}
+
+
+
+transaction CreateBatch {
+
+  o String batchId
+
+  o FcashExchangeRate[] fcashRates
+
+}
+
+
+
+transaction MarkPreProcessComplete {
+
+  o String batchId
+
+}
+
+
+
+transaction CompleteSettlement {
+
+  o String batchId
+
+  o FcashExchangeRate[] fcashRates
+
+}
+
+
+
+transaction MarkPostProcessComplete {
+
+o String batchId
+
+}
+
+
+
+event BatchCreatedEvent {
+
+  o String batchId
+
+}
+
+
+
+concept Settlement {
+
+  o Double amount
+
+  o Currency currency
+
+  --> PointOfExchange creditorPoe
+
+  --> PointOfExchange debtorPoe
+
+}
+
+
+
+concept FcashExchangeRate {
+
+  o String to
+
+  o Double rate
+
+}
+
+
+
+concept Transfer {
+
+  o Currency currency
+
+  o Double amount
+
+  o Integer fromAccount
+
+  o Integer toAccount
+
+}
+
+
+
+enum Currency {
+
+  o FCASH
+
+  o FAIR
+
+	o EURO
+
+	o BTC
+
+}
+
+
+
+enum TransferRequestState {
+
+ o PENDING
+
+ o PROCESSING
+
+ o PRE_PROCESS_COMPLETE
+
+ o COMPLETE
+
+ o ERROR
+
+}
+
+
+
+enum BatchState {
+
+ o PENDING_PRE_PROCESS
+
+ o READY_TO_SETTLE
+
+ o PENDING_POST_PROCESS
+
+ o COMPLETE
+
+}
+
+
